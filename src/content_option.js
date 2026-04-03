@@ -8,7 +8,7 @@ const introdata = {
     title: "I’m Samya Halder",
     animated: {
         first: "Cybersecurity Guy",
-        second: "The Developer",
+        second: "Developer",
         third: "Music Producer",
         fourth: "Security Analyst",
     },
