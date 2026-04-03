@@ -124,10 +124,40 @@ export const Home = () => {
 
     try {
       if (scanMode === "file") {
-        setScanStatus("Uploading file...");
-
+        // Step 1: Hash the file locally (instant)
+        setScanStatus("Hashing file...");
         const buffer = await selectedFile.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const sha256 = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
+        // Step 2: Check if VirusTotal already has this file
+        setScanStatus("Checking database...");
+        try {
+          const reportRes = await fetch("/api/file-report?hash=" + sha256);
+          const reportData = await safeJson(reportRes);
+
+          if (reportRes.ok && reportData.found) {
+            // Already scanned — show results immediately
+            setIsScanning(false);
+            setScanStatus("");
+            navigate("/scan-results", {
+              state: {
+                scanType: "file",
+                scanInput: selectedFile.name,
+                analysisData: reportData.analysis,
+                fullReport: reportData.fullReport,
+              },
+            });
+            return;
+          }
+        } catch (e) {
+          // Hash lookup failed — fall through to upload
+          console.log("Hash lookup unavailable, uploading file...");
+        }
+
+        // Step 3: Not found — upload the file
+        setScanStatus("Uploading file...");
         const response = await fetch("/api/scan-file", {
           method: "POST",
           headers: {
@@ -145,8 +175,38 @@ export const Home = () => {
 
         await pollAnalysis(data.analysisId, selectedFile.name, "file");
       } else {
-        setScanStatus("Submitting URL...");
+        // Normalize URL
+        let normalizedUrl = urlInput.trim();
+        if (!normalizedUrl.startsWith("http://") && !normalizedUrl.startsWith("https://")) {
+          normalizedUrl = "https://" + normalizedUrl;
+        }
 
+        // Step 1: Check if VT already has this URL
+        setScanStatus("Checking database...");
+        try {
+          const reportRes = await fetch("/api/url-report?url=" + encodeURIComponent(normalizedUrl));
+          const reportData = await safeJson(reportRes);
+
+          if (reportRes.ok && reportData.found) {
+            // Already scanned — show results immediately
+            setIsScanning(false);
+            setScanStatus("");
+            navigate("/scan-results", {
+              state: {
+                scanType: "url",
+                scanInput: urlInput,
+                analysisData: reportData.analysis,
+                fullReport: reportData.fullReport,
+              },
+            });
+            return;
+          }
+        } catch (e) {
+          console.log("URL lookup unavailable, submitting for scan...");
+        }
+
+        // Step 2: Not found — submit for fresh scan
+        setScanStatus("Submitting URL...");
         const response = await fetch("/api/scan-url", {
           method: "POST",
           headers: {

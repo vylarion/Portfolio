@@ -8,8 +8,8 @@ const introdata = {
     title: "I’m Samya Halder",
     animated: {
         first: "Cybersecurity Guy",
-        second: "Penetration Tester",
-        third: "Purple Teamer",
+        second: "The Developer",
+        third: "Music Producer",
         fourth: "Security Analyst",
     },
     description: "Scan files for malware & check websites for threats.",
@@ -44,21 +44,6 @@ const skills = [
     { name: "Log Analysis" },
     { name: "Network Security" },
 ];
-
-// Services section currently disabled - contains placeholder content
-/* const services = [{
-    title: "UI & UX Design",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at nisl euismod urna bibendum sollicitudin.",
-},
-{
-    title: "Mobile Apps",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at nisl euismod urna bibendum sollicitudin.",
-},
-{
-    title: "Wordpress Design",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at nisl euismod urna bibendum sollicitudin.",
-},
-]; */
 
 const services = [];
 
